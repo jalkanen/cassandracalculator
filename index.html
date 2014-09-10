@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Cassandra Parameters for Dummies</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js" type="text/javascript"></script>
+
+<style>
+body { width: 800px; margin-left:auto; margin-right:auto; font-family: Arial, sans}
+input { width: 5em; }
+.field { margin-right:20px; display:inline;}
+
+.calculated { font-size: 18px; margin:20px 100px 0px 100px; width: 600px; display:block; }
+
+.calculated span {
+    font-size: 22px;
+    color: #0000FF;
+}
+
+.help {
+   font-size: 9px;
+}
+
+.comments {
+   font-size: 10px;
+   margin: 30px 100px 0px 100px;
+   float:right;
+}
+
+</style>
+</head>
+
+<body>
+<h1>Cassandra Parameters for Dummies</h1>
+
+<p>This simple form allows you to try out different values for your <a href="http://cassandra.apache.org">Apache Cassandra</a> cluster
+and see what the impact is for your application.</p>
+
+<form id="cassForm" action="#">
+
+<div class="field">
+  <label for="N">Cluster size</label>
+  <input type="int" name="N" id="N" value="1" size="5"></input>
+</div>
+
+<div class="field">
+  <label for="RF">Replication Factor</label>
+  <input type="int" name="RF" id="RF" value="1" size="5"></input>
+</div>
+
+<div class="field">
+  <label for="W">Write Level</label>
+  <select id="W" name="W">
+     <option value="one">ONE</option>
+     <option value="quorum">QUORUM</option>
+     <option value="all">ALL</option>
+  </select>
+</div>
+
+<div class="field">
+  <label for="R">Read Level</label>
+  <select id="R" name="R">
+     <option value="one">ONE</option>
+     <option value="quorum">QUORUM</option>
+     <option value="all">ALL</option>
+  </select>
+</div>
+
+<hr />
+
+<div class="calculated">
+   Your reads are <span id="consistency"></span>
+   <div class="help">"Consistent" means that for this particular Read/Write level combo, all nodes will "see" the same data.  "Eventually consistent" means
+        that you might get old data from some nodes and new data for others until the data has been replicated across all devices.  The idea is that this way you can
+        increase read/write speeds and improve tolerance against dead nodes.</div>
+</div>
+
+<div class="calculated">
+   You can survive the loss of <span id="loss"></span>.
+   <div class="help">How many nodes can go down without application noticing? This is a lower bound - in large clusters, you could lose more nodes and if they happen to be handling different parts of the keyspace, then you wouldn't notice either.</div>
+</div>
+
+<div class="calculated">
+   You are really reading from <span id="read"></span> every time.
+   <div class="help">The more nodes you read from, more network traffic ensues, and the bigger the latencies involved.  Cassandra read operation won't return until at least this many nodes have responded with the same data value.</div>
+</div>
+
+<div class="calculated">
+   You are really writing to <span id="write"></span> every time.
+   <div class="help">The more nodes you write to, more network traffic ensues, and the bigger the latencies involved. Cassandra write operation won't return until at least this many nodes have acknowledged receiving the data.</div>
+</div>
+
+<div class="calculated">
+   Each node holds <span id="ratio"></span> of your data.
+   <div class="help">The bigger your cluster is, the more the data gets distributed across your nodes.  If you are using the RandomPartitioner, or are very
+   good at distributing your keys when you use OrderedPartitioner, this is how much data each of your nodes has to handle.  This is also how much
+   of your keyspace becomes inaccessible for each node that you lose beyond the safe limit, above.</div>
+</div>
+
+</form>
+
+<div class="comments">Comments? <a href="mailto:jalkanen@ecyrd.com">jalkanen@ecyrd.com</a></div>
+
+<script type="text/javascript">
+
+recalc();
+
+function realSize(n,x) {
+    if( x === 'one' ) return 1;
+    if( x === 'quorum' ) return Math.floor(n/2+1);
+    if( x === 'all' ) return n;
+}
+
+function recalc() {
+    var n = parseInt($('#N').val());
+    var rf = parseInt($('#RF').val());
+    var r = realSize(rf,$('#R').val());
+    var w = realSize(rf,$('#W').val());
+
+    if( r + w > rf ) $('#consistency').text('consistent');
+    else $('#consistency').text('eventually consistent');
+
+    $('#read').text( r > 1 ? r+" nodes" : "1 node");
+    $('#write').text( w > 1 ? w+" nodes" : "1 node" );
+
+    var survivable = rf-Math.max(r,w);
+    $('#loss').text(  survivable > 1 ? survivable+" nodes" : survivable === 1 ? "1 node" : "no nodes");
+
+    var ratio = rf/n;
+    $('#ratio').text( Math.round(ratio*100)+'%' );
+}
+
+function ensureRFSanity() {
+    var rf = parseInt($('#RF').val());
+    var n = parseInt($('#N').val());
+
+    if( rf > n ) { $('#RF').val(n);  }
+}
+
+$('#RF').keyup( function() {
+    ensureRFSanity();
+    recalc();
+});
+
+$('#N').keyup(function() {
+    ensureRFSanity();
+    recalc();
+});
+
+$('#R').change(function() {
+    recalc();
+});
+
+$('#W').change(function() {
+    recalc();
+});
+
+</script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-151738-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body> </html>

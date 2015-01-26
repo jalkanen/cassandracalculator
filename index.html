@@ -129,7 +129,7 @@ function recalc() {
     var survivable = rf-Math.max(r,w);
     $('#loss').text(  survivable > 1 ? survivable+" nodes" : survivable === 1 ? "1 node" : "no nodes");
 
-    var dataloss = Math.min(rf,w);
+    var dataloss = w - 1;
     $('#dataloss').text( dataloss > 1 ? dataloss+" nodes" : dataloss === 1 ? "1 node" : "no nodes");
 
     var ratio = rf/n;

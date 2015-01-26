@@ -74,8 +74,13 @@ and see what the impact is for your application.</p>
 </div>
 
 <div class="calculated">
-   You can survive the loss of <span id="loss"></span>.
+   You can survive the loss of <span id="loss"></span> without impacting the application.
    <div class="help">How many nodes can go down without application noticing? This is a lower bound - in large clusters, you could lose more nodes and if they happen to be handling different parts of the keyspace, then you wouldn't notice either.</div>
+</div>
+
+<div class="calculated">
+    You can survive the loss of <span id="dataloss"></span> without data loss.
+    <div class="help">How many nodes can go down without physically losing data? This is a lower bound - in large clusters, you could lose more nodes and if they happen to be handling different parts of the keyspace, then you wouldn't notice either.</div>
 </div>
 
 <div class="calculated">
@@ -123,6 +128,9 @@ function recalc() {
 
     var survivable = rf-Math.max(r,w);
     $('#loss').text(  survivable > 1 ? survivable+" nodes" : survivable === 1 ? "1 node" : "no nodes");
+
+    var dataloss = Math.min(rf,w);
+    $('#dataloss').text( dataloss > 1 ? dataloss+" nodes" : dataloss === 1 ? "1 node" : "no nodes");
 
     var ratio = rf/n;
     $('#ratio').text( Math.round(ratio*100)+'%' );

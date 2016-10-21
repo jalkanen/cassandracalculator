@@ -50,6 +50,8 @@ and see what the impact is for your application.</p>
   <label for="W">Write Level</label>
   <select id="W" name="W">
      <option value="one">ONE</option>
+     <option value="two">TWO</option>
+     <option value="three">THREE</option>
      <option value="quorum">QUORUM</option>
      <option value="all">ALL</option>
   </select>
@@ -59,6 +61,8 @@ and see what the impact is for your application.</p>
   <label for="R">Read Level</label>
   <select id="R" name="R">
      <option value="one">ONE</option>
+     <option value="two">TWO</option>
+     <option value="three">THREE</option>
      <option value="quorum">QUORUM</option>
      <option value="all">ALL</option>
   </select>
@@ -105,6 +109,8 @@ recalc();
 
 function realSize(n,x) {
     if( x === 'one' ) return 1;
+    if( x === 'two' ) return 2;
+    if( x === 'three' ) return 3;
     if( x === 'quorum' ) return Math.floor(n/2+1);
     if( x === 'all' ) return n;
 }
